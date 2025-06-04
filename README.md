@@ -81,8 +81,6 @@ emotion-bot/
 
 ├── requirements.txt      # Зависимости Python
 
-├── new_triggers.json     # Правила для триггеров эмоций
-
 ├── user_data.json        # База данных пользователей и их запросов
 
 ├── en.json               # Локализация на английском
