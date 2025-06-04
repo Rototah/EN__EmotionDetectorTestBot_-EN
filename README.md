@@ -25,28 +25,31 @@ Emotion Detection Telegram Bot
 
 Бот распознает следующие эмоции:
 
-Английский(Русский)
-Joy (радость)
-Sadness (грусть)
-Anger (гнев)
-Fear (страх)
-Surprise (удивление)
-Neutral (нейтрально)
-Gratitude (благодарность)
-Excitement (волнение)
-Love ( любовь)
-Loneliness ( одиночество)
-Anticipation( ожидание)
-Disgust ( отвращение)
-Jealousy( ревность)
-Embarrassment ( смущение)
-Serenity ( спокойствие)
-Shame ( стыд)
-Confusion (замешательство)
-no_emotion (нет эмоции)
-Техническая архитектура
+Английский(Русский);
+Joy (радость);
+Sadness (грусть);
+Anger (гнев);
+Fear (страх);
+Surprise (удивление);
+Neutral (нейтрально);
+Gratitude (благодарность);
+Excitement (волнение);
+Love ( любовь);
+Loneliness ( одиночество);
+Anticipation( ожидание);
+Disgust ( отвращение);
+Jealousy( ревность);
+Embarrassment ( смущение);
+Serenity ( спокойствие);
+Shame ( стыд);
+Confusion (замешательство);
+no_emotion (нет эмоции);
+Техническая архитектура;
+
 Проект состоит из двух основных компонентов:
+
 FastAPI сервер (app.py):
+
 Принимает текстовые запросы
 Определяет язык текста
 Выбирает соответствующую модель для анализа
@@ -71,12 +74,19 @@ Telegram бот (bot.py):
 
 emotion-bot/
 ├── bot.py                # Основной код Telegram бота
+
 ├── app.py                # FastAPI сервер для обработки текста
+
 ├── requirements.txt      # Зависимости Python
+
 ├── new_triggers.json     # Правила для триггеров эмоций
+
 ├── user_data.json        # База данных пользователей и их запросов
+
 ├── en.json               # Локализация на английском
+
 ├── ru.json               # Локализация на русском
+
 Запуск проекта
 
 Установите зависимости:
