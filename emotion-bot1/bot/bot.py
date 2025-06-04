@@ -130,15 +130,18 @@ storage = MemoryStorage()
 bot = Bot(token="You_token_bot", default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp = Dispatcher(storage=storage)
 
-# Глобальные переменные
-user_history = {}
-emotion_stats = {}
-message_to_emotion = {}
-user_votes = {}
-user_last_request = defaultdict(float)
+# Глобальные переменные для хранения данных
+user_history = {} # История запросов пользователей
+emotion_stats = {} # Статистика по эмоциям
+message_to_emotion = {} # Соответствие сообщений и эмоций
+user_votes = {} # Голоса пользователей за эмоции
+user_last_request = defaultdict(float) # Время последнего запроса пользователя
 
 async def detect_emotion_api(text: str) -> dict:
-    """Определяет эмоцию через API"""
+    """
+    Отправляет запрос к API для определения эмоции
+    Возвращает словарь с эмоцией, уверенностью и языком
+    """
     lang = detect_language(text)
     try:
         async with aiohttp.ClientSession() as session:
@@ -155,35 +158,35 @@ async def detect_emotion_api(text: str) -> dict:
                     "label": data["label"]
                 }
     except Exception as e:
-        logger.error(f"API error: {e}")
+        logger.error(f"API error: {e}") # Возвращаем нейтральную эмоцию в случае ошибки
         return {
             "emotion": "neutral",
             "confidence": 0.5,
             "language": lang,
             "label": EMOTIONS["neutral"][lang]
         }
-
+#Определяет язык текста по наличию кириллицы
 def detect_language(text: str) -> str:
     return "ru" if re.search(r'[а-яё]', text.lower()) else "en"
-
+#Создает клавиатуру для подтверждения/отклонения эмоции
 def get_feedback_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="👍 Подходит", callback_data="feedback_yes"),
          InlineKeyboardButton(text="👎 Не подходит", callback_data="feedback_no")]
     ])
-
+#Создает клавиатуру с выбором эмоций для обратной связи
 def get_emotions_kb():
     buttons = []
     row = []
     for i, emotion in enumerate(EMOTIONS.keys()):
         row.append(InlineKeyboardButton(text=EMOTIONS[emotion]["ru"], callback_data=f"emotion_{emotion}"))
-        if (i + 1) % 3 == 0:
+        if (i + 1) % 3 == 0: # 3 кнопки в ряд
             buttons.append(row)
             row = []
     if row:
         buttons.append(row)
     return InlineKeyboardMarkup(inline_keyboard=buttons)
-
+#Сохраняет данные пользователей в файл
 def save_data():
     data = {
         "message_to_emotion": message_to_emotion,
@@ -196,7 +199,7 @@ def save_data():
             json.dump(data, f, ensure_ascii=False, indent=2)
     except Exception as e:
         logger.error(f"Ошибка сохранения данных: {e}")
-
+#Загружает данные пользователей из файла
 def load_data():
     if os.path.exists(DATA_FILE):
         try:
@@ -208,10 +211,11 @@ def load_data():
         except Exception as e:
             logger.error(f"Ошибка загрузки данных: {e}")
 
-# Обработчики команд
+# ================== ОБРАБОТЧИКИ КОМАНД ==================
 @dp.message(Command("start"))
 async def start(message: types.Message):
-    """Обработчик команды /start"""
+    #Обработчик команды /start
+    #Приветственное сообщение с описанием возможностей бота
     await message.answer(
         "Hello! I'm an emotion detection bot.\n"
         "Currently, I am only good at defining emotions in English. The Russian language is under development.\n"
@@ -348,13 +352,13 @@ async def how_i_work(message: types.Message):
         
     )
 
-
-# Основной обработчик
+# ================== ОСНОВНОЙ ОБРАБОТЧИК СООБЩЕНИЙ ==================
+#Определяет эмоцию в тексте и отправляет результат пользователю
 @dp.message(F.text)
 async def analyze(message: types.Message, state: FSMContext):
     user_id = message.from_user.id
     current_time = time.time()
-    
+    # Защита от флуда - 10 секунд между запросами
     if current_time - user_last_request.get(user_id, 0) < 10:
         await message.answer("Пожалуйста, подождите 10 секунд перед следующим запросом.")
         return
@@ -408,7 +412,7 @@ async def analyze(message: types.Message, state: FSMContext):
             f"{emotion_data['label']} (уверенность: {emotion_data['confidence']:.0%})",
             reply_markup=get_feedback_kb()
         )
-    
+    # Сохраняем состояние для обработки обратной связи
     await state.set_state(FeedbackStates.waiting_for_feedback)
     await state.set_data({
         "user_text": message.text.lower(),
@@ -418,14 +422,14 @@ async def analyze(message: types.Message, state: FSMContext):
     
     save_data()
 
-# Обработчики обратной связи
-@dp.callback_query(F.data.startswith("feedback_"))
+# ================== ОБРАБОТЧИКИ ОБРАТНОЙ СВЯЗИ ==================
+@dp.callback_query(F.data.startswith("feedback_")) #Обработчик обратной связи (подтверждение/отклонение эмоции)
 async def handle_feedback(callback: types.CallbackQuery, state: FSMContext):
     user_data = await state.get_data()
     user_text = user_data.get("user_text", "")
     original_emotion = user_data.get("original_emotion", "")
     
-    if callback.data == "feedback_yes":
+    if callback.data == "feedback_yes": # Пользователь подтвердил эмоцию - увеличиваем счетчик
         if user_text not in user_votes:
             user_votes[user_text] = Counter()
         user_votes[user_text][original_emotion] += 1
@@ -434,14 +438,14 @@ async def handle_feedback(callback: types.CallbackQuery, state: FSMContext):
         max_emotion = max(votes, key=votes.get)
         lang = detect_language(user_text)
         
-        # Только редактируем подпись, не удаляем сообщение
+         # Обновляем подпись сообщения
         await callback.message.edit_caption(
             caption=f"✅ Ваш голос учтён: {EMOTIONS[max_emotion][lang]} (голосов: {votes[max_emotion]})",
             reply_markup=None  # Убираем кнопки
         )
         await state.clear()
 
-    elif callback.data == "feedback_no":
+    elif callback.data == "feedback_no":# Пользователь отверг эмоцию - предлагаем выбрать правильную
         await callback.message.edit_caption(
             "Какая эмоция подходит лучше?",
             reply_markup=get_emotions_kb()
@@ -451,14 +455,14 @@ async def handle_feedback(callback: types.CallbackQuery, state: FSMContext):
     save_data()
     await callback.answer()
 
-@dp.callback_query(F.data.startswith("emotion_"), FeedbackStates.waiting_for_emotion)
+@dp.callback_query(F.data.startswith("emotion_"), FeedbackStates.waiting_for_emotion)  #Обработчик выбора эмоции пользователем
 async def handle_emotion_choice(callback: types.CallbackQuery, state: FSMContext):
     selected_emotion = callback.data.split("_")[1]
     user_data = await state.get_data()
     user_text = user_data.get("user_text", "")
     original_emotion = user_data.get("original_emotion", "")
     message_id = user_data.get("message_id", "")
-    
+    # Увеличиваем счетчик для выбранной эмоции
     if user_text not in user_votes:
         user_votes[user_text] = Counter()
     user_votes[user_text][selected_emotion] += 1
@@ -466,7 +470,7 @@ async def handle_emotion_choice(callback: types.CallbackQuery, state: FSMContext
     votes = user_votes[user_text]
     lang = detect_language(user_text)
     
-    # Удаляем предыдущий стикер только при изменении эмоции
+     # Если эмоция изменилась, удаляем старый стикер и отправляем новый
     if selected_emotion != original_emotion:
         try:
             await bot.delete_message(chat_id=callback.message.chat.id, message_id=message_id)
@@ -481,7 +485,7 @@ async def handle_emotion_choice(callback: types.CallbackQuery, state: FSMContext
                     caption=f"✅ Спасибо за помощь! Благодаря вам, я стал умнее!\n"
                            f"Выбрано: {EMOTIONS[selected_emotion][lang]} (голосов: {votes[selected_emotion]})"
                 )
-        else:
+        else: 
             await callback.message.answer(
                 f"✅ Спасибо за помощь! Благодаря вам, я стал умнее!\n"
                 f"Выбрано: {EMOTIONS[selected_emotion][lang]} (голосов: {votes[selected_emotion]})"
@@ -497,16 +501,16 @@ async def handle_emotion_choice(callback: types.CallbackQuery, state: FSMContext
     save_data()
     await callback.answer()
 
-# Запуск
+# ================== ЗАПУСК БОТА ==================
 async def on_startup():
-    load_data()
+    load_data() # Загружаем сохраненные данные
     logger.info("Bot started")
 
 async def on_shutdown():
-    save_data()
+    save_data() # Сохраняем данные перед выходом
     logger.info("Bot stopped")
 
 if __name__ == "__main__":
-    dp.startup.register(on_startup)
+    dp.startup.register(on_startup) # Регистрируем обработчики событий
     dp.shutdown.register(on_shutdown)
-    asyncio.run(dp.start_polling(bot))
+    asyncio.run(dp.start_polling(bot))   # Запускаем бота
