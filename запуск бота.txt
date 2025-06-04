@@ -1,0 +1,20 @@
+для запуска бота, нужно расположить папку с ним на рабочем столе и ввести в командную строку следующее:
+cd C:\Username\\Desktop\emotion-bot
+
+В моем случае:
+cd C:\Regag\\Desktop\emotion-bot
+
+скачиваем нужную версию пайтон(3.11.8)
+https://www.python.org/downloads/release/python-3118/
+
+Потом надо установить зависимости, без которых код не будет работать
+pip install -r requirements.txt
+
+далее запускаем API сервер:
+python api/app.py
+
+открываем другое окно и вводим для запуска бота:
+python bot/bot.py
+
+для проверки api переходим по этому адресу:
+http://localhost:8002/docs#/default/predict_predict_post
