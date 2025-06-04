@@ -92,15 +92,12 @@ emotion-bot/
 ***Запуск проекта***
 
 Установите зависимости:
-
 pip install -r requirements.txt
 
 Запустите FastAPI сервер:
-
 python app.py
 
 Запустите Telegram бота:
-
 python bot.py
 
 ***Особенности реализации***
