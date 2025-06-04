@@ -126,7 +126,7 @@ class FeedbackStates(StatesGroup):
     waiting_for_emotion = State()
 
 storage = MemoryStorage()
-bot = Bot(token="8085305653:AAF9PT4PrItuach8YtY7DC-EL135qrQ3xwM", default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+bot = Bot(token="You_bot_token", default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp = Dispatcher(storage=storage)
 
 # Глобальные переменные
