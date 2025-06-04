@@ -1,3 +1,4 @@
+# bot.py - Telegram бот для взаимодействия с пользователями
 import os
 import re
 import json
@@ -17,14 +18,14 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.storage.memory import MemoryStorage
 
-# Настройки
+# Настройки логирования
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_FILE = os.path.join(BASE_DIR, "bot/data/user_data.json")
 #VOTE_THRESHOLD = 2  # Минимальное количество голосов для подтверждения эмоции
-
+# Словарь эмоций с переводами
 EMOTIONS = {
     "joy": {"ru": "радость", "en": "joy"},
     "sadness": {"ru": "грусть", "en": "sadness"},
@@ -45,7 +46,7 @@ EMOTIONS = {
     "confusion": {"ru": "замешательство", "en": "confusion"},
     "no_emotion": {"ru": "нет эмоции", "en": "no emotion"},
 }
-
+# Пути к файлам стикеров для разных эмоций
 STICKER_PATHS = {
     "joy": {
         "ru": os.path.join(BASE_DIR, "bot/assets/ru/радость.gif"),
@@ -120,13 +121,13 @@ STICKER_PATHS = {
         "en": os.path.join(BASE_DIR, "bot/assets/en/no_emotion.gif")}
     
 }
-
+# Состояния для машины состояний (FSM)
 class FeedbackStates(StatesGroup):
     waiting_for_feedback = State()
     waiting_for_emotion = State()
 
 storage = MemoryStorage()
-bot = Bot(token="7910083860:AAE3teWilHcYcLhrSswJazgiXygx8scxvWc", default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+bot = Bot(token="You_token_bot", default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp = Dispatcher(storage=storage)
 
 # Глобальные переменные
