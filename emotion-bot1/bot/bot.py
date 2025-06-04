@@ -126,7 +126,7 @@ class FeedbackStates(StatesGroup):
     waiting_for_emotion = State()
 
 storage = MemoryStorage()
-bot = Bot(token="You_bot_token", default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+bot = Bot(token="7910083860:AAE3teWilHcYcLhrSswJazgiXygx8scxvWc", default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp = Dispatcher(storage=storage)
 
 # Глобальные переменные
@@ -213,14 +213,20 @@ async def start(message: types.Message):
     """Обработчик команды /start"""
     await message.answer(
         "Hello! I'm an emotion detection bot.\n"
-        "Привет! Я бот для определения эмоций.\n\n"
         "Currently, I am only good at defining emotions in English. The Russian language is under development.\n"
-        "В настоящее время я хорошо определяю эмоции только на английском языке. Русский язык находится в разработке.\n\n"
         "If you have trouble with English, here's a very accurate translator:\n"
-        "Если у вас проблемы с английским, вот очень точный переводчик:\n"
         "https://www.deepl.com/translator\n\n"
-        "Send me a message in English and I'll detect the emotion in it!\n"
-        "Отправьте мне сообщение на английском, и я определю эмоцию!"
+	"If you have any questions about how I work, email me the /how_i_work command\n"
+	"Send me a message in English or Russian and I'll identify the emotion!”\n\n\n"
+        
+  
+
+	"Привет! Я бот для определения эмоций.\n"
+	"В настоящее время я хорошо определяю эмоции только на английском языке. Русский язык находится в разработке.\n"
+	"Если у вас проблемы с английским, вот очень точный переводчик:\n"
+	"https://www.deepl.com/translator\n\n"
+	"Если у вас есть вопросы, как я работаю, напишите мне команду /how_i_work\n"
+	"Отправьте мне сообщение на английском или русском, и я определю эмоцию!"
     )
 
 @dp.message(Command("help"))
@@ -311,7 +317,21 @@ async def show_history(message: types.Message):
 @dp.message(Command("how_i_work"))
 async def how_i_work(message: types.Message):
     await message.answer(
-        "🤖 <b>Как я работаю:</b>\n\n"
+	"🤖 <b>How I work:</b>\n\n"
+        "I am a bot for detecting emotions in text. Вот мои возможности:\n\n"
+        "🔹 <b>Available commands:</b>{n}\n"
+        "/start - start chatting.\n"
+        "/help - quick help.\n"
+        "/stats - your personalized emotion stats.\n"
+        "/how_i_work - подробное описание моей работы\n\n"
+        "🔹 <b>How to use:</b>\n"
+        "You can confirm my choice or specify the correct emotion - it will help me be more accurate!\n\n"
+        "🔹 <b>Feedback system:</b>\n"
+        "If I'm wrong, please click 'Not Applicable' and select the correct option.\n"
+        "I will remember your choice for this text for the future and suggest it to other users.\n\n"
+             
+
+	"🤖 <b>Как я работаю:</b>\n\n"
         "Я - бот для определения эмоций в тексте. Вот мои возможности:\n\n"
         "🔹 <b>Доступные команды:</b>\n"
         "/start - начать общение\n"
@@ -324,7 +344,7 @@ async def how_i_work(message: types.Message):
         "🔹 <b>Система обратной связи:</b>\n"
         "Если я ошибся, нажмите 'Не подходит' и выберите верный вариант.\n"
         "Я запомню ваш выбор для этого текста на будущее.",
-        parse_mode=ParseMode.HTML
+        
     )
 
 
